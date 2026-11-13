@@ -12,12 +12,36 @@
         <h1 class="text-2xl font-bold">{{ $post->title }}</h1>
 
         <p class="text-sm text-gray-500 mt-1">
-            {{ $post->published_at->format('M d, Y') }} · {{ $post->views }} views
+            By <a href="{{ route('authors.show', $post->author) }}" class="text-blue-700 hover:underline">{{ $post->author->name }}</a>
+            · {{ $post->published_at->format('M d, Y') }} · {{ $post->views }} views
         </p>
+
+        <div class="flex flex-wrap gap-2 mt-3">
+            @foreach ($post->tags as $tag)
+                <a href="{{ route('posts.index', ['tag' => $tag->name]) }}"
+                    class="text-xs bg-gray-200 text-gray-700 rounded-full px-2 py-1 hover:bg-gray-300">#{{ $tag->name }}</a>
+            @endforeach
+        </div>
 
         {{-- {{ }} escapes html so no xss --}}
         <p class="mt-4 whitespace-pre-line">{{ $post->body }}</p>
 
         <a href="{{ route('posts.index') }}" class="inline-block mt-6 text-blue-700 hover:underline">← Back to posts</a>
+    </div>
+
+    <div class="bg-white rounded shadow p-6 mt-6">
+        <h2 class="text-lg font-semibold mb-4">Comments ({{ $post->comments->count() }})</h2>
+
+        @forelse ($post->comments as $comment)
+            <div class="border-t border-gray-200 py-3">
+                <p class="text-sm font-semibold">
+                    {{ $comment->user->name }}
+                    <span class="font-normal text-gray-500">· {{ $comment->created_at->format('M d, Y g:i A') }}</span>
+                </p>
+                <p class="mt-1">{{ $comment->body }}</p>
+            </div>
+        @empty
+            <p class="text-gray-500">No comments yet.</p>
+        @endforelse
     </div>
 @endsection

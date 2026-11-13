@@ -20,7 +20,7 @@
                 @auth
                     {{-- only users linked to an author can post --}}
                     @if (auth()->user()->author)
-                        <a href="{{ url('/posts/create') }}" class="hover:underline">New post</a>
+                        <a href="{{ route('posts.create') }}" class="hover:underline">New post</a>
                     @endif
 
                     <span>{{ auth()->user()->name }}</span>

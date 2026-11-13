@@ -14,6 +14,13 @@
             @endforeach
         </select>
 
+        <select name="tag" class="border border-gray-300 rounded px-3 py-2 bg-white">
+            <option value="">All tags</option>
+            @foreach ($tags as $tag)
+                <option value="{{ $tag }}" @selected(request('tag') == $tag)>{{ $tag }}</option>
+            @endforeach
+        </select>
+
         <button type="submit" class="bg-blue-700 text-white rounded px-4 py-2">Filter</button>
     </form>
 
@@ -32,10 +39,17 @@
                     {{ $post->title }}
                 </a>
 
-                {{-- author id only, author name needs a relationship (week 11) --}}
                 <p class="text-sm text-gray-500 mt-2">
-                    {{ $post->published_at->format('M d, Y') }} · {{ $post->views }} views · Author ID: {{ $post->author_id }}
+                    By <a href="{{ route('authors.show', $post->author) }}" class="text-blue-700 hover:underline">{{ $post->author->name }}</a>
+                    · {{ $post->published_at->format('M d, Y') }} · {{ $post->views }} views · {{ $post->comments_count }} comments
                 </p>
+
+                <div class="flex flex-wrap gap-2 mt-3">
+                    @foreach ($post->tags as $tag)
+                        <a href="{{ route('posts.index', ['tag' => $tag->name]) }}"
+                            class="text-xs bg-gray-200 text-gray-700 rounded-full px-2 py-1 hover:bg-gray-300">#{{ $tag->name }}</a>
+                    @endforeach
+                </div>
             </div>
         @empty
             <p class="text-gray-500">No posts match your search.</p>
