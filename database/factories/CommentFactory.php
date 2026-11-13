@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class CommentFactory extends Factory
 {
+    // fake comment data
+    // Post::factory() and User::factory() only make a new post/user if I don't
+    // pass post_id/user_id myself (CommentSeeder always passes them)
     public function definition(): array
     {
         return [

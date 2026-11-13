@@ -4,6 +4,7 @@
     <div class="bg-white rounded shadow p-6 max-w-2xl mx-auto">
         <h1 class="text-2xl font-bold mb-4">New post</h1>
 
+        {{-- error summary at the top, lists every message from StorePostRequest --}}
         @if ($errors->any())
             <div class="mb-4 bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded">
                 <p class="font-semibold">Please fix the following:</p>
@@ -20,6 +21,7 @@
 
             <div>
                 <label for="title" class="block text-sm font-medium mb-1">Title</label>
+                {{-- old() on every field so nothing gets erased when there's an error --}}
                 <input type="text" id="title" name="title" value="{{ old('title') }}"
                     class="w-full border border-gray-300 rounded px-3 py-2">
                 @error('title')
@@ -32,6 +34,7 @@
                 <select id="category" name="category" class="w-full border border-gray-300 rounded px-3 py-2 bg-white">
                     <option value="">Choose a category</option>
                     @foreach ($categories as $category)
+                        {{-- @selected keeps the category I picked before the error --}}
                         <option value="{{ $category }}" @selected(old('category') == $category)>{{ $category }}</option>
                     @endforeach
                 </select>
@@ -51,6 +54,8 @@
             <div>
                 <p class="block text-sm font-medium mb-1">Tags</p>
                 <div class="flex flex-wrap gap-4">
+                    {{-- name="tags[]" sends an array of tag ids --}}
+                    {{-- old('tags', []) = the ids I checked before, [] if it's the first time --}}
                     @foreach ($tags as $tag)
                         <label class="flex items-center gap-2">
                             <input type="checkbox" name="tags[]" value="{{ $tag->id }}"
@@ -62,12 +67,14 @@
                 @error('tags')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
+                {{-- tags.* = error for one of the ids, like if someone sends a fake id --}}
                 @error('tags.*')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
 
             <div>
+                {{-- unchecked = not sent at all, store() uses boolean() to make it false --}}
                 <label class="flex items-center gap-2">
                     <input type="checkbox" name="is_published" value="1" @checked(old('is_published'))>
                     Publish now

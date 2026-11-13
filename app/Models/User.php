@@ -47,11 +47,14 @@ class User extends Authenticatable
     }
 
     // only the kagawad user has an author row
+    // hasOne because user_id is in the authors table, not here
+    // residents like Lola get null, that's how I check who can post
     public function author()
     {
         return $this->hasOne(Author::class);
     }
 
+    // all comments this user wrote (comments.user_id)
     public function comments()
     {
         return $this->hasMany(Comment::class);

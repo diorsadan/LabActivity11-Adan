@@ -30,16 +30,20 @@ class Post extends Model
         'published_at' => 'datetime',
     ];
 
+    // posts table has author_id so post belongsTo author
     public function author()
     {
         return $this->belongsTo(Author::class);
     }
 
+    // 1 post has many comments (comments.post_id)
     public function comments()
     {
         return $this->hasMany(Comment::class);
     }
 
+    // many-to-many through the post_tag pivot table
+    // lets me use attach(), sync(), whereHas('tags')
     public function tags()
     {
         return $this->belongsToMany(Tag::class);

@@ -32,7 +32,9 @@
     <div class="bg-white rounded shadow p-6 mt-6">
         <h2 class="text-lg font-semibold mb-4">Comments ({{ $post->comments->count() }})</h2>
 
+        {{-- only logged in users see the form, guests get the sign in link --}}
         @auth
+            {{-- error summary, $errors is filled when StoreCommentRequest fails --}}
             @if ($errors->any())
                 <div class="mb-4 bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded">
                     <ul class="list-disc list-inside text-sm">
@@ -46,7 +48,9 @@
             <form method="POST" action="{{ route('comments.store', $post) }}" class="mb-6">
                 @csrf
                 <label for="body" class="block text-sm font-medium mb-1">Add a comment</label>
+                {{-- old('body') puts back what I typed if validation failed --}}
                 <textarea id="body" name="body" rows="3" class="w-full border border-gray-300 rounded px-3 py-2">{{ old('body') }}</textarea>
+                {{-- @error shows the message for just this field --}}
                 @error('body')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
@@ -58,6 +62,7 @@
             </p>
         @endauth
 
+        {{-- already newest first and comment.user loaded from $post->load() in show() --}}
         @forelse ($post->comments as $comment)
             <div class="border-t border-gray-200 py-3">
                 <p class="text-sm font-semibold">

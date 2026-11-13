@@ -11,12 +11,16 @@ class CommentSeeder extends Seeder
 {
     public function run(): void
     {
+        // get users once, then pick random ones from this list
         $users = User::all();
 
         // 0 to 5 comments per published post, using users that already exist
+        // drafts are skipped, pinned post is done separately below
         $posts = Post::where('is_published', true)->where('is_pinned', false)->get();
 
         foreach ($posts as $post) {
+            // sequence gives each comment a different random user
+            // passing post_id in create() stops the factory from making new posts
             Comment::factory()
                 ->count(rand(0, 5))
                 ->sequence(fn ($seq) => ['user_id' => $users->random()->id])

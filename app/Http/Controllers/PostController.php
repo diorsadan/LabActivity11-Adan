@@ -12,7 +12,8 @@ class PostController extends Controller
     public function index(Request $request)
     {
         // only published posts, drafts are hidden
-        // with() loads authors and tags in 2 extra queries instead of 1 per post
+        // with() loads authors and tags in 2 extra queries instead of 1 per post (no N+1)
+        // withCount adds $post->comments_count without loading every comment
         $query = Post::where('is_published', true)
             ->with(['author', 'tags'])
             ->withCount('comments');
@@ -27,6 +28,7 @@ class PostController extends Controller
         }
 
         // only posts that have this tag
+        // whereHas = filter posts by something in a related table (tags)
         if ($request->filled('tag')) {
             $query->whereHas('tags', fn ($q) => $q->where('name', $request->tag));
         }
@@ -40,6 +42,7 @@ class PostController extends Controller
             ->withQueryString();
 
         // categories and tags for the dropdowns
+        // pluck = just a list of names, not full models
         $categories = Post::query()->distinct()->orderBy('category')->pluck('category');
         $tags = Tag::orderBy('name')->pluck('name');
 
@@ -55,7 +58,9 @@ class PostController extends Controller
         $post->views++;
         $post->save();
 
+        // load() = eager loading after I already have the post
         // newest comments first, and the user of each comment
+        // comments.user = nested, so each comment's name doesn't need its own query
         $post->load(['author', 'tags', 'comments' => fn ($q) => $q->latest(), 'comments.user']);
 
         return view('posts.show', compact('post'));
@@ -64,25 +69,32 @@ class PostController extends Controller
     public function create()
     {
         // residents without an author row can't open the form
+        // abort_unless = stop with 403 if this is false/null
         abort_unless(auth()->user()->author, 403);
 
+        // full models here (not pluck) because the checkboxes need id + name
         $tags = Tag::orderBy('name')->get();
         $categories = ['Announcement', 'Health', 'Peace & Order', 'Ayuda', 'Livelihood'];
 
         return view('posts.create', compact('tags', 'categories'));
     }
 
+    // StorePostRequest runs first: authorize() then rules()
+    // if anything fails it never reaches this code
     public function store(StorePostRequest $request)
     {
         // tags go to the pivot table, not the posts table
+        // safe() = only validated fields, so extra stuff in the form is ignored
         $data = $request->safe()->except('tags');
 
         // unchecked checkbox is not sent at all, boolean() makes it false
         $data['is_published'] = $request->boolean('is_published');
+        // drafts have no published_at (same as Lab 10)
         $data['published_at'] = $data['is_published'] ? now() : null;
 
         // author_id is filled in by the relationship
         $post = auth()->user()->author->posts()->create($data);
+        // sync saves the checked tag ids into post_tag
         $post->tags()->sync($request->validated('tags'));
 
         return redirect()->route('posts.index')->with('status', 'Post created.');

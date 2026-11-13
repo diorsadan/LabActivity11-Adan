@@ -4,6 +4,7 @@
     <div class="bg-white rounded shadow p-6">
         <h1 class="text-2xl font-bold">{{ $author->name }}</h1>
         <p class="text-gray-500">{{ $author->position }}</p>
+        {{-- $posts->count() counts the collection I already have, $commentsCount is from hasManyThrough --}}
         <p class="text-sm text-gray-500 mt-2">{{ $posts->count() }} published posts · {{ $commentsCount }} comments received</p>
     </div>
 

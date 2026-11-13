@@ -14,6 +14,7 @@
             @endforeach
         </select>
 
+        {{-- tag filter, sends ?tag=name to index() --}}
         <select name="tag" class="border border-gray-300 rounded px-3 py-2 bg-white">
             <option value="">All tags</option>
             @foreach ($tags as $tag)
@@ -39,11 +40,14 @@
                     {{ $post->title }}
                 </a>
 
+                {{-- $post->author is already loaded by with(), so no extra query here --}}
+                {{-- comments_count comes from withCount('comments') --}}
                 <p class="text-sm text-gray-500 mt-2">
                     By <a href="{{ route('authors.show', $post->author) }}" class="text-blue-700 hover:underline">{{ $post->author->name }}</a>
                     · {{ $post->published_at->format('M d, Y') }} · {{ $post->views }} views · {{ $post->comments_count }} comments
                 </p>
 
+                {{-- each tag badge is a link that filters the list by that tag --}}
                 <div class="flex flex-wrap gap-2 mt-3">
                     @foreach ($post->tags as $tag)
                         <a href="{{ route('posts.index', ['tag' => $tag->name]) }}"

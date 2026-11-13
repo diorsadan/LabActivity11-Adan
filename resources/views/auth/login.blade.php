@@ -6,10 +6,13 @@
             <h1 class="text-2xl font-bold text-blue-700 text-center">Sign in</h1>
             <p class="text-sm text-gray-500 text-center mb-6">Purok Adan residents and officials</p>
 
+            {{-- goes to POST /login (AuthController@login) --}}
             <form method="POST" action="{{ url('/login') }}" class="space-y-5">
+                {{-- hidden csrf token, without it laravel returns 419 --}}
                 @csrf
 
                 <div>
+                    {{-- old('email') keeps what I typed after a wrong login, password is never kept --}}
                     <label for="email" class="block text-sm font-medium mb-1">Email</label>
                     <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus
                            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300">
