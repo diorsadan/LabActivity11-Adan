@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePostRequest;
 use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
@@ -58,5 +59,32 @@ class PostController extends Controller
         $post->load(['author', 'tags', 'comments' => fn ($q) => $q->latest(), 'comments.user']);
 
         return view('posts.show', compact('post'));
+    }
+
+    public function create()
+    {
+        // residents without an author row can't open the form
+        abort_unless(auth()->user()->author, 403);
+
+        $tags = Tag::orderBy('name')->get();
+        $categories = ['Announcement', 'Health', 'Peace & Order', 'Ayuda', 'Livelihood'];
+
+        return view('posts.create', compact('tags', 'categories'));
+    }
+
+    public function store(StorePostRequest $request)
+    {
+        // tags go to the pivot table, not the posts table
+        $data = $request->safe()->except('tags');
+
+        // unchecked checkbox is not sent at all, boolean() makes it false
+        $data['is_published'] = $request->boolean('is_published');
+        $data['published_at'] = $data['is_published'] ? now() : null;
+
+        // author_id is filled in by the relationship
+        $post = auth()->user()->author->posts()->create($data);
+        $post->tags()->sync($request->validated('tags'));
+
+        return redirect()->route('posts.index')->with('status', 'Post created.');
     }
 }
