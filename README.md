@@ -1,24 +1,40 @@
-# Barangay Bulletin – Purok Adan
+# LabActivity11-Adan – Barangay Bulletin (Purok Adan)
 
-Lab Activity 10 for Full-Stack Web Development. A simple barangay bulletin made with Laravel 12, SQLite and Eloquent where residents can browse, search and filter posts from barangay officials.
+Lab Activity 11 for 4-334 Full-Stack Web Development.
+Made by **Dion Ren Adan**.
 
-## Posts per page
-I used **6** posts per page. My last name "Adan" only has 4 letters, so I followed the rule to use 6 if the last name is shorter than 6 letters.
+This continues my Lab 10 Barangay Bulletin. Now posts show the author's name and tags,
+logged-in residents can comment, and the Kagawad can create new posts from the site.
+All forms are validated using Form Requests.
 
-## Custom category
-My extra category is **Livelihood**, for posts about livelihood programs and trainings in the barangay.
+## Seeded logins
 
-## Birthday post
-My pinned post is **"Purok Adan Clean-up Drive"**, written by Kagawad Dion Ren Adan, with published_at set to **2026-12-03** (my birthday).
+Password for both: `bulletin2026`
 
-## How to run
-```
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan migrate:fresh --seed
-npm install
-npm run dev
-php artisan serve
-```
-Then open http://127.0.0.1:8000 in the browser.
+| Name | Email | What they can do |
+|---|---|---|
+| Lola Adan | lola.adan@bulletin.test | resident – can comment only |
+| Kagawad Dion Ren Adan | kagawad.adan@bulletin.test | has an author profile – can comment and create posts |
+
+There are also 8 random resident users made by the factory.
+
+## Tags
+
+Purok Adan, Urgent, Libre, Schedule, Bakuna (Bakuna is my own tag)
+
+The pinned post "Purok Adan Clean-up Drive" always has Purok Adan and Urgent.
+
+## Relationships I used
+
+- **User hasOne Author / Author belongsTo User** – one login account can have at most one
+  author profile. I added a nullable `user_id` to authors because not every author needs a login,
+  and residents like Lola don't have an author profile. This is also how I check who can post.
+- **Author hasMany Post / Post belongsTo Author** – one Kagawad can write many posts, but each
+  post only has one author (`author_id` on posts).
+- **Post hasMany Comment / Comment belongsTo Post** – a post can have many comments but a comment
+  is only for one post.
+- **User hasMany Comment / Comment belongsTo User** – a user can comment many times, and each
+  comment needs to know who wrote it so I can show the name.
+- **Post belongsToMany Tag** – one post can have many tags and one tag can be on many posts, so
+  I needed the pivot table `post_tag`. Tags are added with `attach()` and `sync()`.
+- **Author hasManyThrough Comment (through Post)** – comments
